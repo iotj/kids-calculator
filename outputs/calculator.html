@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>어린이 계산기</title>
+    <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Jua', sans-serif;
+            background-color: #FFF9E6;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 400px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        /* Tab Navigation */
+        .tabs {
+            display: flex;
+            background: #E8E8E8;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            background: transparent;
+            color: #666;
+        }
+
+        .tab.active {
+            background: #4ECDC4;
+            color: white;
+        }
+
+        .tab:hover:not(.active) {
+            background: #D0D0D0;
+        }
+
+        /* Content Area */
+        .content {
+            padding: 20px;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        /* Calculator Screen */
+        .display {
+            width: 100%;
+            height: 80px;
+            background: white;
+            border: 2px solid #E0E0E0;
+            border-radius: 10px;
+            text-align: right;
+            padding: 0 20px;
+            font-size: 36px;
+            color: #2C3E50;
+            margin-bottom: 15px;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .btn {
+            width: 100%;
+            height: 70px;
+            border: none;
+            border-radius: 15px;
+            font-size: 24px;
+            font-family: 'Jua', sans-serif;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+
+        .btn:hover {
+            filter: brightness(1.1);
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-number {
+            background: #4ECDC4;
+            color: white;
+        }
+
+        .btn-operator {
+            background: #FF6B6B;
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .btn-special {
+            background: #95E1D3;
+            color: #2C3E50;
+        }
+
+        /* Quiz Screen */
+        .quiz-score {
+            text-align: center;
+            font-size: 22px;
+            color: #2C3E50;
+            margin-bottom: 20px;
+        }
+
+        .quiz-problem {
+            background: white;
+            border: 2px solid #E0E0E0;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            font-size: 36px;
+            color: #2C3E50;
+            margin-bottom: 20px;
+        }
+
+        .quiz-input-area {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .quiz-label {
+            font-size: 18px;
+            color: #2C3E50;
+        }
+
+        .quiz-input {
+            width: 100px;
+            height: 50px;
+            border: 2px solid #4ECDC4;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 24px;
+            font-family: 'Jua', sans-serif;
+            color: #2C3E50;
+        }
+
+        .quiz-input:focus {
+            outline: none;
+            border-color: #FF6B6B;
+        }
+
+        .quiz-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .quiz-btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 15px;
+            font-size: 20px;
+            font-family: 'Jua', sans-serif;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+
+        .quiz-btn:hover {
+            filter: brightness(1.1);
+        }
+
+        .quiz-btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-check {
+            background: #4ECDC4;
+            color: white;
+        }
+
+        .btn-new {
+            background: #95E1D3;
+            color: #2C3E50;
+        }
+
+        .feedback {
+            text-align: center;
+            font-size: 24px;
+            margin-top: 20px;
+            min-height: 36px;
+            animation: pop 0.3s ease;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .feedback.correct {
+            color: #2ECC71;
+        }
+
+        .feedback.wrong {
+            color: #F39C12;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="tabs">
+            <button class="tab active" onclick="showScreen('calculator')">계산기</button>
+            <button class="tab" onclick="showScreen('quiz')">퀴즈</button>
+        </div>
+
+        <div class="content">
+            <!-- Calculator Screen -->
+            <div id="calculator" class="screen active">
+                <input type="text" class="display" id="display" readonly value="0">
+                <div class="buttons">
+                    <button class="btn btn-number" onclick="appendNumber('7')">7</button>
+                    <button class="btn btn-number" onclick="appendNumber('8')">8</button>
+                    <button class="btn btn-number" onclick="appendNumber('9')">9</button>
+                    <button class="btn btn-operator" onclick="appendOperator('/')">/</button>
+
+                    <button class="btn btn-number" onclick="appendNumber('4')">4</button>
+                    <button class="btn btn-number" onclick="appendNumber('5')">5</button>
+                    <button class="btn btn-number" onclick="appendNumber('6')">6</button>
+                    <button class="btn btn-operator" onclick="appendOperator('*')">x</button>
+
+                    <button class="btn btn-number" onclick="appendNumber('1')">1</button>
+                    <button class="btn btn-number" onclick="appendNumber('2')">2</button>
+                    <button class="btn btn-number" onclick="appendNumber('3')">3</button>
+                    <button class="btn btn-operator" onclick="appendOperator('-')">-</button>
+
+                    <button class="btn btn-special" onclick="clearDisplay()">C</button>
+                    <button class="btn btn-number" onclick="appendNumber('0')">0</button>
+                    <button class="btn btn-special" onclick="calculate()">=</button>
+                    <button class="btn btn-operator" onclick="appendOperator('+')">+</button>
+                </div>
+            </div>
+
+            <!-- Quiz Screen -->
+            <div id="quiz" class="screen">
+                <div class="quiz-score">점수: <span id="score">0</span> / <span id="total">0</span></div>
+                <div class="quiz-problem" id="problem">5 + 3 = ?</div>
+                <div class="quiz-input-area">
+                    <span class="quiz-label">답을 입력하세요:</span>
+                    <input type="number" class="quiz-input" id="answer" min="0" max="99">
+                </div>
+                <div class="quiz-buttons">
+                    <button class="quiz-btn btn-check" onclick="checkAnswer()">정답 확인</button>
+                    <button class="quiz-btn btn-new" onclick="newProblem()">새 문제</button>
+                </div>
+                <div class="feedback" id="feedback"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Calculator Variables
+        let currentInput = '0';
+        let previousInput = '';
+        let operator = null;
+        let shouldResetDisplay = false;
+
+        // Quiz Variables
+        let correctAnswer = 0;
+        let score = 0;
+        let totalQuestions = 0;
+
+        // Tab Navigation
+        function showScreen(screenName) {
+            // Update tabs
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Update screens
+            document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+            document.getElementById(screenName).classList.add('active');
+
+            // Generate new quiz problem when switching to quiz
+            if (screenName === 'quiz' && totalQuestions === 0) {
+                newProblem();
+            }
+        }
+
+        // Calculator Functions
+        function updateDisplay() {
+            document.getElementById('display').value = currentInput;
+        }
+
+        function appendNumber(num) {
+            if (shouldResetDisplay) {
+                currentInput = num;
+                shouldResetDisplay = false;
+            } else if (currentInput === '0') {
+                currentInput = num;
+            } else {
+                currentInput += num;
+            }
+            updateDisplay();
+        }
+
+        function appendOperator(op) {
+            if (operator !== null) {
+                calculate();
+            }
+            previousInput = currentInput;
+            operator = op;
+            shouldResetDisplay = true;
+        }
+
+        function calculate() {
+            if (operator === null || shouldResetDisplay) return;
+
+            const prev = parseFloat(previousInput);
+            const current = parseFloat(currentInput);
+            let result;
+
+            switch (operator) {
+                case '+':
+                    result = prev + current;
+                    break;
+                case '-':
+                    result = prev - current;
+                    break;
+                case '*':
+                    result = prev * current;
+                    break;
+                case '/':
+                    if (current === 0) {
+                        currentInput = '0';
+                        updateDisplay();
+                        return;
+                    }
+                    result = prev / current;
+                    break;
+            }
+
+            // Round to avoid floating point issues
+            result = Math.round(result * 1000000) / 1000000;
+            currentInput = result.toString();
+            operator = null;
+            shouldResetDisplay = true;
+            updateDisplay();
+        }
+
+        function clearDisplay() {
+            currentInput = '0';
+            previousInput = '';
+            operator = null;
+            shouldResetDisplay = false;
+            updateDisplay();
+        }
+
+        // Quiz Functions
+        function generateProblem() {
+            const operators = ['+', '-'];
+            const op = operators[Math.floor(Math.random() * operators.length)];
+            let num1, num2;
+
+            if (op === '+') {
+                num1 = Math.floor(Math.random() * 10) + 1;  // 1-10
+                num2 = Math.floor(Math.random() * 10) + 1;  // 1-10
+                correctAnswer = num1 + num2;
+            } else {
+                // For subtraction, ensure positive result
+                num1 = Math.floor(Math.random() * 10) + 10;  // 10-19
+                num2 = Math.floor(Math.random() * num1);     // 0 to num1-1
+                correctAnswer = num1 - num2;
+            }
+
+            return `${num1} ${op} ${num2} = ?`;
+        }
+
+        function newProblem() {
+            const problem = generateProblem();
+            document.getElementById('problem').textContent = problem;
+            document.getElementById('answer').value = '';
+            document.getElementById('feedback').textContent = '';
+            document.getElementById('feedback').className = 'feedback';
+            document.getElementById('answer').focus();
+        }
+
+        function checkAnswer() {
+            const userAnswer = parseInt(document.getElementById('answer').value);
+            const feedbackEl = document.getElementById('feedback');
+
+            if (isNaN(userAnswer)) {
+                feedbackEl.textContent = '숫자를 입력해주세요!';
+                feedbackEl.className = 'feedback wrong';
+                return;
+            }
+
+            totalQuestions++;
+            document.getElementById('total').textContent = totalQuestions;
+
+            if (userAnswer === correctAnswer) {
+                score++;
+                document.getElementById('score').textContent = score;
+
+                const messages = ['잘했어요!', '대단해요!', '정답이에요!', '최고예요!'];
+                feedbackEl.textContent = messages[Math.floor(Math.random() * messages.length)];
+                feedbackEl.className = 'feedback correct';
+            } else {
+                const messages = ['다시 도전해봐요!', '조금만 더 생각해봐요!', '괜찮아요, 다시 해봐요!'];
+                feedbackEl.textContent = messages[Math.floor(Math.random() * messages.length)] + ` (정답: ${correctAnswer})`;
+                feedbackEl.className = 'feedback wrong';
+            }
+
+            // Re-trigger animation
+            feedbackEl.style.animation = 'none';
+            feedbackEl.offsetHeight; // Trigger reflow
+            feedbackEl.style.animation = 'pop 0.3s ease';
+        }
+
+        // Allow Enter key to submit answer in quiz
+        document.getElementById('answer').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkAnswer();
+            }
+        });
+
+        // Initialize
+        updateDisplay();
+    </script>
+</body>
+</html>
