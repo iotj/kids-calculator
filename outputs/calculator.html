@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>어린이 계산기</title>
-    <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -13,7 +12,7 @@
         }
 
         body {
-            font-family: 'Jua', sans-serif;
+            font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', '맑은 고딕', sans-serif;
             background-color: #FFF9E6;
             min-height: 100vh;
             display: flex;
@@ -96,7 +95,7 @@
             border: none;
             border-radius: 15px;
             font-size: 24px;
-            font-family: 'Jua', sans-serif;
+            font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', '맑은 고딕', sans-serif;
             cursor: pointer;
             transition: all 0.1s;
         }
@@ -165,7 +164,7 @@
             border-radius: 10px;
             text-align: center;
             font-size: 24px;
-            font-family: 'Jua', sans-serif;
+            font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', '맑은 고딕', sans-serif;
             color: #2C3E50;
         }
 
@@ -186,7 +185,7 @@
             border: none;
             border-radius: 15px;
             font-size: 20px;
-            font-family: 'Jua', sans-serif;
+            font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', '맑은 고딕', sans-serif;
             cursor: pointer;
             transition: all 0.1s;
         }
@@ -382,22 +381,33 @@
 
         // Quiz Functions
         function generateProblem() {
-            const operators = ['+', '-'];
+            const operators = ['+', '-', '×', '÷'];
             const op = operators[Math.floor(Math.random() * operators.length)];
-            let num1, num2;
+            let num1, num2, display;
 
             if (op === '+') {
                 num1 = Math.floor(Math.random() * 10) + 1;  // 1-10
                 num2 = Math.floor(Math.random() * 10) + 1;  // 1-10
                 correctAnswer = num1 + num2;
-            } else {
-                // For subtraction, ensure positive result
-                num1 = Math.floor(Math.random() * 10) + 10;  // 10-19
-                num2 = Math.floor(Math.random() * num1);     // 0 to num1-1
+                display = `${num1} + ${num2} = ?`;
+            } else if (op === '-') {
+                num1 = Math.floor(Math.random() * 10) + 10; // 10-19
+                num2 = Math.floor(Math.random() * num1);    // 0 to num1-1
                 correctAnswer = num1 - num2;
+                display = `${num1} - ${num2} = ?`;
+            } else if (op === '×') {
+                num1 = Math.floor(Math.random() * 9) + 1;   // 1-9
+                num2 = Math.floor(Math.random() * 9) + 1;   // 1-9
+                correctAnswer = num1 * num2;
+                display = `${num1} × ${num2} = ?`;
+            } else {
+                num2 = Math.floor(Math.random() * 8) + 2;   // 2-9
+                correctAnswer = Math.floor(Math.random() * 9) + 1; // 1-9
+                num1 = num2 * correctAnswer;                 // 나누어 떨어지는 수
+                display = `${num1} ÷ ${num2} = ?`;
             }
 
-            return `${num1} ${op} ${num2} = ?`;
+            return display;
         }
 
         function newProblem() {
